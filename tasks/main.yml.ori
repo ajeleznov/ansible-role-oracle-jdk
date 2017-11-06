@@ -1,0 +1,30 @@
+---
+# tasks file for oracle-jdk
+# The Oracle JDK rpm file will be downloaded from K+N Nexus repository and installed in the default location under /usr/java
+
+  - name: Check for installed Oracle JDK
+    command: "rpm -qa --queryformat '%{VERSION}\n' jdk\\*"
+    register: result
+
+  - name: Output the results
+    debug:
+      var: result.stdout
+      verbosity: 1
+
+  - name: Download Oracle JDK rpm file
+   get_url:
+    url: "{{jdk_download_url}}/{{jdk_rpm}}"
+    dest: "{{workspace}}"
+
+  - name: Install Oracle JDK rpm file
+   yum:
+    name: "{{workspace}}/{{jdk_rpm}}"
+    state: present
+   become: true
+
+  - name: Delete downloaded file
+    file:
+      path="{{workspace}}/{{jdk_rpm}}" state=absent
+
+  - name: Test java command
+    command: "/usr/java/default/bin/java -version"

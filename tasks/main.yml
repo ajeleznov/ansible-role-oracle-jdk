@@ -1,0 +1,63 @@
+---
+# tasks file for ajeleznov.oracle-jdk ansible role
+# The Oracle JDK rpm file will be downloaded from repository and installed in the default location under /usr/java
+
+  - name:         "Debug output for role parameters"
+    tags:         "oracle-jdk"
+    debug:
+      msg:        "Running with delete_other_installations={{ delete_other_installations }}, java_version={{ java_version }}"
+      verbosity:  1
+
+  - name:         "Delete other Oracle JDK"
+    tags:         "remove-oracle-jdk"
+    yum:
+      name:       "{{ item }}"
+      state:      absent
+    with_items:
+      - "{{ java_versions | difference(java_version) }}"
+    when:         delete_other_installations
+    become:       True
+
+  - name:         "Check for installed Oracle JDK"
+    tags:         "oracle-jdk"
+    yum:
+      list:       "{{ java_version }}"
+    register:     jdk_status
+
+  - name:         "Output the results"
+    tags:         "oracle-jdk"
+    debug:
+      var:        jdk_status.results[0].name
+      verbosity:  1
+
+  - name:         "Download Oracle JDK rpm file"
+    tags:         "oracle-jdk"
+    get_url:
+      url:        "{{ jdk_download_url }}/{{ jdk_rpm }}"
+      dest:       "{{ workspace }}"
+    when:         jdk_status.results|length == 0
+
+  - name:         "Install Oracle JDK rpm file"
+    tags:         "oracle-jdk"
+    yum:
+      name:       "{{workspace}}/{{jdk_rpm}}"
+      state:      present
+    when:         jdk_status.results|length == 0
+    become:       True
+
+  - name:         "Delete downloaded file"
+    tags:         "oracle-jdk"
+    file:
+      path:       "{{workspace}}/{{jdk_rpm}}"
+      state:      absent
+
+  - name:         "Test java command"
+    tags:         "oracle-jdk"
+    command:      "/usr/java/{{ java_version }}/bin/java -version"
+    register:     jdk_output
+
+  - name:         "Output the results"
+    tags:         "oracle-jdk"
+    debug:
+      var:        jdk_output.stderr
+      verbosity:  1

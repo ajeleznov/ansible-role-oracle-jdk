@@ -1,0 +1,5 @@
+---
+# vars file for ajeleznov.oracle-jdk ansible role
+jdk_version:              "{{ java_version| regex_replace('jdk\\d\\.(\\d*)\\.\\d_(\\d*)','\\1u\\2' ) }}"
+jdk_rpm:                  "jdk-{{ jdk_version }}-linux-x64.rpm"
+jdk_download_url:         "http://repository.int.kn:8081/nexus/service/local/repositories/thirdparty/content/com/oracle/jdk/{{ jdk_version }}"
