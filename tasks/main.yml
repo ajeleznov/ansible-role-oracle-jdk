@@ -5,7 +5,7 @@
   - name:         "Debug output for role parameters"
     tags:         "oracle-jdk"
     debug:
-      msg:        "Running with delete_other_installations={{ delete_other_installations }}, java_version={{ java_version }}"
+      msg:        "Running with delete_other_installations={{ delete_other_installations }}, java_version={{ java_version }}, jdk_package={{ jdk_package }}"
       verbosity:  1
 
   - name:         "Delete other Oracle JDK"
@@ -21,7 +21,7 @@
   - name:         "Check for installed Oracle JDK"
     tags:         "oracle-jdk"
     yum:
-      list:       "{{ java_version }}"
+      list:       "{{ jdk_package }}"
     register:     jdk_status
 
   - name:         "Output the results"
