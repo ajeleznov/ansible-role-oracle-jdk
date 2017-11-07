@@ -17,7 +17,7 @@ See defaults/main.yml
 
 Example Playbook
 ----------------
-
+'''
 hosts:          test
 gather_facts:   False
 
@@ -28,7 +28,7 @@ tasks:
     delete_other_installations:   True
     java_version:                 "jdk1.8.0_131"
     workspace:                    "/tmp"
-
+'''
 License
 -------
 
