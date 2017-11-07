@@ -17,18 +17,19 @@ See defaults/main.yml
 
 Example Playbook
 ----------------
-'''
-hosts:          test
+```
+hosts:		test
 gather_facts:   False
 
 tasks:
-- import_role:
-    name: ajeleznov.oracle-jdk
-  vars:
-    delete_other_installations:   True
-    java_version:                 "jdk1.8.0_131"
-    workspace:                    "/tmp"
-'''
+	- import_role:
+	    name: ajeleznov.oracle-jdk
+	  vars:
+	    delete_other_installations:   True
+	    java_version:                 "jdk1.8.0_131"
+	    workspace:                    "/tmp"
+```
+
 License
 -------
 
