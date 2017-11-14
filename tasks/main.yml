@@ -5,10 +5,17 @@
   - name:         "Debug output for role parameters"
     tags:         "oracle-jdk"
     debug:
-      msg:        "Running with delete_other_installations={{ delete_other_installations }}, java_version={{ java_version }}, jdk_package={{ jdk_package }}"
+      msg:        "Running with delete_other_installations={{ delete_other_installations }}, old package name={{ java_version }}, new package name={{ package_newname }}"
       verbosity:  1
 
-  - name:         "Delete other Oracle JDK"
+  - name:         "Check if java_version has a valid value"
+    tags:         "oracle-jdk"
+    fail:
+      msg:        "java_version = {{ java_version }} is not a valid value"
+      with_items: "{{ java_versions }}"
+    when:       java_version not in java_versions
+
+  - name:         "Delete other Oracle JDK packages with name jdk1.X.0_X"
     tags:         "remove-oracle-jdk"
     yum:
       name:       "{{ item }}"
@@ -18,38 +25,81 @@
     when:         delete_other_installations
     become:       True
 
-  - name:         "Check for installed Oracle JDK"
+  - name:         "Delete other Oracle JDK packages with name jdk1.X"
+    tags:         "remove-oracle-jdk"
+    yum:
+      name:       "{{ item }}"
+      state:      absent
+    with_items:
+      - "{{ package_newname }}"
+    when:         delete_other_installations and
+                  java_version not in new_packages
+    become:       True
+
+  - name:         "Check for installed Oracle JDK with name {{ java_version }}"
     tags:         "oracle-jdk"
     yum:
-      list:       "{{ jdk_package }}"
-    register:     jdk_status
+      list:       "{{ java_version }}"
+    register:     package_status
 
-  - name:         "Output the results"
+  - name:         "Output the results if {{ java_version }} is installed"
     tags:         "oracle-jdk"
     debug:
-      var:        jdk_status.results[0].name
+      msg:        "A package {{ java_version }} is already installed."
       verbosity:  1
+    when:         package_status.results[0] is defined
+
+  - name:         "Check for installed Oracle JDK with name jdk1.X"
+    tags:         "oracle-jdk"
+    yum:
+      list:       "{{ package_newname }}"
+    register:     package_newname_status
+
+  - name:         "Output the results if {{ package_newname }} is installed"
+    tags:         "oracle-jdk"
+    debug:
+      msg:        "A package {{ package_newname }} is already installed with a version {{ package_newname_status.results[0].version }}."
+      verbosity:  1
+    when:         package_newname_status.results[0] is defined
+
+  - name:         "Set a version for a package jdk1.X"
+    tags:         "oracle-jdk"
+    set_fact:
+      installed_version:  "jdk{{ package_newname_status.results[0].version }}"
+    when:         package_newname_status.results[0] is defined
+
+  - name:         "Set a version for a package jdk1.X if first attepmt not succeded"
+    set_fact:
+      installed_version:  "N/A"
+    when:         package_newname_status.results[0] is not defined and
+                  java_version in new_packages
+
+  # the other versions have been deinstalled
 
   - name:         "Download Oracle JDK rpm file"
     tags:         "oracle-jdk"
     get_url:
-      url:        "{{ jdk_download_url }}/{{ jdk_rpm }}"
+      url:        "{{ jdk_download_url }}/{{ jdk_rpm_file }}"
       dest:       "{{ workspace }}"
-    when:         jdk_status.results|length == 0
+    when:         ( java_version in new_packages and java_version != installed_version ) or
+                  ( java_version not in new_packages and package_status.results|length == 0 )
 
   - name:         "Install Oracle JDK rpm file"
     tags:         "oracle-jdk"
     yum:
-      name:       "{{workspace}}/{{jdk_rpm}}"
+      name:       "{{workspace}}/{{jdk_rpm_file}}"
       state:      present
-    when:         jdk_status.results|length == 0
+    when:         ( java_version in new_packages and java_version != installed_version ) or
+                  ( java_version not in new_packages and package_status.results|length == 0 )
     become:       True
 
   - name:         "Delete downloaded file"
     tags:         "oracle-jdk"
     file:
-      path:       "{{workspace}}/{{jdk_rpm}}"
+      path:       "{{workspace}}/{{jdk_rpm_file}}"
       state:      absent
+    when:         ( java_version in new_packages and java_version != installed_version ) or
+                  ( java_version not in new_packages and package_status.results|length == 0 )
 
   - name:         "Test java command"
     tags:         "oracle-jdk"
