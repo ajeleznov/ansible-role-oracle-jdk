@@ -1,9 +1,11 @@
 ---
 # defaults file for ajeleznov.oracle-jdk ansible role
 delete_other_installations:   True
-java_version:                 "jdk1.8.0_131"
+java_version:                 "jdk1.8.0_161"
 workspace:                    /data/workspace
 java_versions:
+  - "jdk1.8.0_162"
+  - "jdk1.8.0_161"
   - "jdk1.8.0_152"
   - "jdk1.8.0_151"
   - "jdk1.8.0_144"
@@ -35,5 +37,5 @@ java_versions:
   - "jdk1.8.0"
 
 new_packages:
-  - "jdk1.8.0_152"
-  - "jdk1.8.0_151"
+  - "jdk1.8.0_162"
+  - "jdk1.8.0_161"
