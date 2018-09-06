@@ -13,7 +13,7 @@
     fail:
       msg:        "java_version = {{ java_version }} is not a valid value"
       with_items: "{{ java_versions }}"
-    when:       java_version not in java_versions
+    when:         java_version not in java_versions
 
   - name:         "Delete other Oracle JDK packages with name jdk1.X.0_X"
     tags:         "remove-oracle-jdk"
@@ -21,7 +21,7 @@
       name:       "{{ item }}"
       state:      absent
     with_items:
-      - "{{ java_versions | difference(java_version) }}"
+               - "{{ java_versions | difference(java_version) }}"
     when:         delete_other_installations
     become:       True
 
@@ -31,7 +31,7 @@
       name:       "{{ item }}"
       state:      absent
     with_items:
-      - "{{ package_newname }}"
+                - "{{ package_newname }}"
     when:         delete_other_installations and
                   java_version not in new_packages
     become:       True
@@ -88,7 +88,8 @@
     tags:         "oracle-jdk"
     yum:
       name:       "{{workspace}}/{{jdk_rpm_file}}"
-      state:      present
+      state:      installed
+      allow_downgrade: "{{ allow_downgrade }}"
     when:         ( java_version in new_packages and java_version != installed_version ) or
                   ( java_version not in new_packages and package_status.results|length == 0 )
     become:       True
@@ -103,7 +104,7 @@
 
   - name:         "Test java command"
     tags:         "oracle-jdk"
-    command:      "/usr/java/{{ java_version }}/bin/java -version"
+    command:      "/usr/java/default/bin/java -version"
     register:     jdk_output
 
   - name:         "Output the results"

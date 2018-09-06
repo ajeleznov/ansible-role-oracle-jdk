@@ -8,6 +8,9 @@ You need to download JDK rpm files from Oracle site: http://www.oracle.com/techn
 and upload them into your local repository like Nexus OSS.
 You need to specify an URL fo this repository (see Example Playbook) through parameter jdk_download_url.
 
+This role will download the Oracle JDK rpm file from a local repository and
+install it in the default location under /usr/java
+
 Requirements
 ------------
 
