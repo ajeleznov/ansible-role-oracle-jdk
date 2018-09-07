@@ -3,6 +3,7 @@
 delete_other_installations:   True
 java_version:                 "jdk1.8.0_181"
 workspace:                    /data/workspace
+allow_downgrade:              True
 java_versions:
   - "jdk1.8.0_181"
   - "jdk1.8.0_172"
